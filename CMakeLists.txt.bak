@@ -1,0 +1,16 @@
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/boost_1_75_0/.git")       
+	execute_process(COMMAND git submodule update --init                     
+	WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+endif()
+# 这个命令检查子模块目录是否存在，如果不存在，则执行git submodule update --init命令来初始化子模块。
+
+#查找并链接Boost库：使用find_package命令来查找Boost库。CMake的FindBoost模块会尝试找到Boost库并设置相应的变量。在你的CMakeLists.txt中添加以下命令：
+
+find_package(Boost 1.75.0 REQUIRED)
+#这将查找Boost库并设置Boost_INCLUDE_DIRS和Boost_LIBRARIES等变量。确保版本号与你的Boost子模块匹配。
+
+#配置目标以使用Boost库：
+#在你的目标（可执行文件或库）定义中，使用target_include_directories来添加Boost头文件的路径，并使用target_link_libraries来链接Boost库：
+
+target_include_directories(your_target PRIVATE ${Boost_INCLUDE_DIRS})   
+target_link_libraries(your_target PRIVATE ${Boost_LIBRARIES})

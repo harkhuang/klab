@@ -1,30 +1,25 @@
 
-# add_subdirectory(thrift)
-# add_subdirectory(protobuf)
-
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_BINARY_DIR}/include/thrift
+        ${CMAKE_BINARY_DIR}/include
 )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O2")
 
 # 将源代码添加到此项目的可执行文件。
-add_executable (demo1 main.cpp)
+add_executable (demoX main.cpp)
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
 
-add_dependencies(demo1
-		libboost
-		# gen_client_protocol
-		# gen_server_protocol
+# target_link_options(demoX PRIVATE "--as-needed")
+# target_link_options(demoX PRIVATE "-Wl")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -pg")
+# target_link_options(demoX PRIVATE "-pg")
+add_dependencies(demoX libboost libtcmalloc )
+
+
+
+target_link_libraries(demoX
+        libtcmalloc.a 
+        libprofiler.a
+        pthread
         )
-
-# target_link_libraries(demo1
-# 		#YYService
-# 		# ServiceGateClient
-# 		# # eduFrame
-# 		# libthrift.a
-# 		# libmetrics.a
-# 		# libp2cache.a
-#         # libprotobuf.a
-# 		# libcrypto.a
-# 		pthread
-# 		rt
-#         )

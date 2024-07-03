@@ -1,6 +1,6 @@
 include(ExternalProject)
 #配置需要编译的boost所用的库
-set(BUILD_BOOST_LIBS "filesystem,program_options,stacktrace,test")
+set(BUILD_BOOST_LIBS "filesystem,program_options,stacktrace,test,thread,system")
 
 ExternalProject_Add(libboost
         EXCLUDE_FROM_ALL 1
@@ -10,6 +10,41 @@ ExternalProject_Add(libboost
         BUILD_COMMAND ""
         INSTALL_COMMAND ./b2 cxxflags="-std=c++11" link=static install --prefix=${PROJECT_BINARY_DIR}
         )
+
+
+ExternalProject_Add(libtcmalloc
+        EXCLUDE_FROM_ALL 1
+        URL ${PROJECT_SOURCE_DIR}/tar/gperftools-2.10.tar.gz
+        # CONFIGURE_COMMAND ./configure --prefix=${PROJECT_BINARY_DIR} --enable-shared=no --disable-cpu-profiler --disable-heap-profiler --disable-heap-checker --disable-debugalloc --enable-minimal
+        CONFIGURE_COMMAND ./configure --prefix=${PROJECT_BINARY_DIR} --enable-shared=no 
+        BUILD_IN_SOURCE 1
+        BUILD_COMMAND make -j4
+        INSTALL_COMMAND make install  
+)
+
+ExternalProject_Add(libgoogletest
+        EXCLUDE_FROM_ALL 1
+        URL ${PROJECT_SOURCE_DIR}/tar/googletest-release-1.8.1.tar.gz
+        CMAKE_COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
+        BUILD_IN_SOURCE 1
+        BUILD_COMMAND make -j4
+        INSTALL_COMMAND make install  
+)
+
+
+ExternalProject_Add(libbenchmark
+        EXCLUDE_FROM_ALL 1
+        DEPENDS libgoogletest
+        URL ${PROJECT_SOURCE_DIR}/tar/benchmark-1.8.4.tar.gz
+        CMAKE_COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release 
+                                       -DBUILD_STATIC_LIBS=ON 
+                                       -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
+                                       -DBENCHMARK_ENABLE_GTEST_TESTS=OFF 
+        BUILD_IN_SOURCE 1
+        BUILD_COMMAND make -j4
+        INSTALL_COMMAND make install  
+)
+
 
 # ExternalProject_Add(libtcmalloc
 #         EXCLUDE_FROM_ALL 1

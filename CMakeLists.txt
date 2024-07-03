@@ -31,6 +31,14 @@ link_directories(
         ${PROJECT_BINARY_DIR}/lib
 )
 
+set(ALL_STATIC_LIBS)
+
+# 将 "path/to/static_libs" 目录下所有的 .a 文件添加到 ALL_STATIC_LIBS 变量
+file(GLOB ALL_STATIC_LIBS "${PROJECT_BINARY_DIR}/lib/*.a")
+
+# 链接所有找到的静态库
+
+
 include(3rd.cmake)
 
 # 包含子项目。

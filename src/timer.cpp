@@ -1,3 +1,83 @@
+// #include <gperftools/profiler.h>
+// #include <stdlib.h>
+// #include<iostream>
+// #include<iomanip>
+
+
+// #include<vector>
+// using namespace std;
+
+// class Complex {
+// private:
+// 	vector<double> pis;
+// 	void recordPI(double x);
+// public:
+// 	Complex();
+// 	double calculatePI(int n);
+// 	~Complex();
+// };
+
+
+// using namespace std;
+
+// vector<long long> vll;
+
+
+
+// Complex::Complex() {
+// }
+
+// void Complex::recordPI(double x) {
+// 	pis.push_back(x);
+// 	if (pis.size() > 10000) pis.clear();
+// }
+
+// double Complex::calculatePI(int n) {
+// 	double x = 2, z = 2;
+// 	int a = 1, b = 3;
+// 	while (n--) {
+// 		z = z*a / b;
+// 		x += z;
+// 		a++;
+// 		b += 2;
+// 		recordPI(x);
+// 	}
+// 	return x;
+// }
+
+// Complex::~Complex() {
+// }
+
+// void recordSum(long long s) {
+// 	vll.push_back(s);
+// 	if (vll.size() > 10000) vll.clear();
+// }
+
+// long long calculateSum(long long n) {
+//   	ProfilerStart("1.out");
+
+// 	long long s = 0;
+// 	for (int i = 1; i <= n; ++i) {
+// 		s += i;
+// 		recordSum(s);
+// 	}
+//   	ProfilerStop();
+
+// 	return s;
+// }
+
+// int main() {
+//   	ProfilerStart("");
+// 	long long n = 10000000;
+// 	Complex c;
+// 	double p = c.calculatePI(n);
+// 	long long s = calculateSum(n);
+// 	cout << "pi=" << fixed << setprecision(13) << p << endl;
+// 	cout << "1+2+...+" << n << "=" << s << endl;
+//   	ProfilerStop();
+// 	return 0;
+// }
+
 #include <iostream>
 #include <atomic>
 #include <thread>
@@ -54,6 +134,8 @@ bool shouldDequeue(int size) {
 
 void threadSafeDequeue(LockFreeCircularQueue &queue) {
     int value;
+
+
     for(int i =PUTSIZE  ; i < PUTSIZE/5 ; i++ ) {
         if (queue.dequeue(value, shouldDequeue)) {
             std::cout << "Dequeued: " << value << std::endl;
@@ -61,7 +143,11 @@ void threadSafeDequeue(LockFreeCircularQueue &queue) {
             std::cout << "Dequeue condition not met or queue is empty!" << std::endl;
         }
     }
+
 }
+
+
+
 
 int test_free_queue() {
     const int queueSize = 15; // 队列大小设置为15，以允许队列中的元素数量小于10
@@ -100,11 +186,6 @@ int test_free_queue() {
 
     return 0;
 }
-
-
-
-
-
 
 
 #include <iostream>
@@ -146,13 +227,70 @@ int test_ptr() {
 
     return 0;
 }
+// #include <boost/asio.hpp>
+// #include <boost/thread.hpp>
+// #include <boost/function.hpp>
+// #include <iostream>
+// #include <boost/bind.hpp>
+// #include <boost/system/error_code.hpp>
+// #include <iostream>
+
+// class TaskRunner {
+// public:
+//     // 构造函数
+//     TaskRunner() : value(0) {}
+
+//     // 成员函数
+//     void my_task() {
+//         // std::cout << "Task is running in thread " << std::this_thread::get_id()
+//         //           << " with value: " << value << '\n';
+//         // // 模拟任务执行时间
+//         // std::this_thread::sleep_for(std::chrono::seconds(1));
+//     }
+
+// private:
+//     int value;
+// };
+
+// int main() {
+//     TaskRunner runner;
+//     boost::asio::thread_pool pool(4); // 创建具有 4 个线程的线程池
+
+//     // 使用 boost::bind 绑定成员函数和对象
+//     // boost::asio::post(pool, boost::bind(&TaskRunner::my_task, &runner));
+
+//     // 等待所有任务完成
+//     pool.join();
+
+//     return 0;
+// }
 
 
+#include <boost/thread.hpp>
+#include <boost/asio.hpp>
+#include <iostream>
 
+void my_task()
+{
+    std::cout << "Task is running in thread " << boost::this_thread::get_id() << '\n';
+}
 
+int main()
+{
+    // Launch the pool with four threads.
+    boost::asio::thread_pool pool(4);
 
+    // Submit a function to the pool.
+    boost::asio::post(pool, my_task);
 
+    // Submit a lambda object to the pool.
+    boost::asio::post(pool, [](){
+        std::cout << "Lambda task is running in thread " << boost::this_thread::get_id() << '\n';
+    });
 
+    // Wait for all tasks in the pool to complete.
+    pool.join();
 
-
+    return 0;
+}
 //  gprof ./demo1 gmon.out > profile.txt > gprof ./demo1 -l gmon.out > profile_line.txt

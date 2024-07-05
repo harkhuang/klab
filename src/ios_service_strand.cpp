@@ -313,20 +313,19 @@ public:
     int i;
 };
 
-
 class TaskRunner {
 public:
 
      ~TaskRunner() { std::cout << "in taskrunner xi gou" <<std::endl;}
     void my_task(MyData &mydata) {
-    mydata.i++;
+        mydata.i++;
         i++;
-        // std::cout << "Task is running in thread " << boost::this_thread::get_id() << '\n';
     }
 
     void my_task_ptr(std::shared_ptr<MyData> mydata) {
         mydata->i++;
         i++;
+        std::cout << __FUNCTION__ << " | count:"<< mydata.use_count() << std::endl;
         // std::cout << "Task is running in thread " << boost::this_thread::get_id() << '\n';
     }
 };
@@ -335,33 +334,24 @@ public:
 ////////////////////////////////////post//////////////////////////////////////////
 
 TaskRunner runner;
-// MyData mydata;
 boost::asio::io_service io_s;
 boost::thread_group threads;
-
 boost::asio::io_service::work work_(io_s);
 boost::asio::io_service::strand strand_(io_s);
 
 
 
 void init_ios() {
-
-    // 为 io_service 创建工作线程
-    // for (int i = 0; i < boost::thread::hardware_concurrency(); ++i) {
-    for (int i = 0; i < 4; ++i) {
-        threads.create_thread(
-            boost::bind(&boost::asio::io_service::run, &io_s));
+    for (int i = 0; i < 2; ++i) {
+        threads.create_thread(boost::bind(&boost::asio::io_service::run, &io_s));
     }
-
-    auto mydata_ptr = std::make_shared<MyData>();
-    // 提交任务到 io_service
-    for (int i = 0; i < 1; ++i) {
-        io_s.post(boost::bind(&TaskRunner::my_task_ptr, &runner, mydata_ptr));
+    for (int i = 0; i < 100; ++i) {
+        auto mydata_ptr = std::make_shared<MyData>();
+        // io_s.post(boost::bind(&TaskRunner::my_task_ptr, &runner, mydata_ptr));
+        strand_.post(boost::bind(&TaskRunner::my_task_ptr, &runner, mydata_ptr));
     }
-
     boost::this_thread::sleep_for(boost::chrono::seconds(1));
     std::cout << "Task is running in thread " << i <<std::endl;
-    // 等待所有任务完成
     threads.join_all();
 }
 ////////////////////////////////////post//////////////////////////////////////////
@@ -371,14 +361,11 @@ void init_ios() {
 
 
 ////////////////////////////////////thread-pool//////////////////////////////////////////
-
-
 boost::asio::thread_pool  *mypool;
-
 void processmd(){
-   auto mydata_ptr = std::make_shared<MyData>();
-    // strand_.post(boost::bind(&TaskRunner::my_task_ptr, &runner,  mydata_ptr));
-   boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr, &runner,  mydata_ptr));
+//    auto mydata_ptr = std::make_shared<MyData>();
+//     // strand_.post(boost::bind(&TaskRunner::my_task_ptr, &runner,  mydata_ptr));
+//    boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr, &runner,  mydata_ptr));
 }
 
 
@@ -390,6 +377,6 @@ void processmd(){
 int main() {
     init_ios();
     // test_boost_strand();
-    processmd();
+    // processmd();
     return 0;
 }

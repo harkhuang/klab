@@ -33,7 +33,9 @@ public:
 class TaskRunner {
 public:
 
-     ~TaskRunner() { std::cout << "TaskRunner xi gou" <<std::endl;}
+     ~TaskRunner() { 
+        //std::cout << "TaskRunner xi gou" <<std::endl;
+     }
     void my_task(MyData &mydata) {
     mydata.i++;
         i++;
@@ -45,20 +47,36 @@ public:
         mydata->i++;
         // boost::this_thread::sleep_for(boost::chrono::seconds(1)); 
         // std::cout <<  __LINE__ << "|" << boost::this_thread::get_id() << "|" << mydata.use_count() << "|" << i << '\n';
+        std::cout << __FUNCTION__ << "yinyong_use use: " << mydata.use_count() << std::endl;
+
+        // boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr2, this,  mydata));
+        // boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr3, this,  mydata));
     }
 
     // 异步任务
     void my_task_ptr2(const std::shared_ptr<MyData> mydata) {
         mydata->i++;
+        std::cout << __FUNCTION__ << "yinyong_use use: " << mydata.use_count() << std::endl;
+        // std::cout <<  __LINE__<< "|"  << boost::this_thread::get_id() << "|" << mydata.use_count() << "|" << i << '\n';
+    }
+
+        // 异步任务
+    void my_task_ptr3(const std::shared_ptr<MyData> mydata) {
+        mydata->i++;
+        std::cout << __FUNCTION__ << "yinyong_use use: " << mydata.use_count() << std::endl;
+
         // boost::this_thread::sleep_for(boost::chrono::seconds(1));
         // std::cout <<  __LINE__<< "|"  << boost::this_thread::get_id() << "|" << mydata.use_count() << "|" << i << '\n';
     }
 
     
-    void strand_task(const std::shared_ptr<MyData> mydata_ptr){
-        boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr, this,  mydata_ptr));
+    void strand_task(const std::shared_ptr<MyData> mydata){
+        // boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr, this,  mydata));
+        boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr, this,  mydata));
+        std::cout << __FUNCTION__ << "yinyong_use use: " << mydata.use_count() << std::endl;
+
         // std::cout <<  __LINE__ << "|" << boost::this_thread::get_id() << "|" << mydata_ptr.use_count() << "|" << i << '\n';
-        boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr2, this,  mydata_ptr));
+        // boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr2, this,  mydata_ptr));
        // std::cout <<  __LINE__<< "|"  << boost::this_thread::get_id() << "|" << mydata_ptr.use_count() << "|" << i << '\n';
     }
 
@@ -82,25 +100,27 @@ void init_ios() {
 }
 
 
-// 提交智能指针任务到线程池
-void processmd(std::shared_ptr<MyData > mydata_ptr){
-    boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr, &runner,  mydata_ptr));
-       // std::cout <<  __LINE__<< "|"  << boost::this_thread::get_id() << "|" << mydata_ptr.use_count() << "|" << i << '\n';
-}
+// // 提交智能指针任务到线程池
+// void processmd(std::shared_ptr<MyData > mydata_ptr){
+//     boost::asio::post(*mypool,boost::bind(&TaskRunner::my_task_ptr, &runner,  mydata_ptr));
+//        // std::cout <<  __LINE__<< "|"  << boost::this_thread::get_id() << "|" << mydata_ptr.use_count() << "|" << i << '\n';
+// }
 
 
-void thread_pool_task() {
-    auto mydata_ptr = std::make_shared<MyData>();
-    // 线性执行
-    boost::asio::post(*signal_thread,boost::bind(&TaskRunner::my_task_ptr, &runner,  mydata_ptr));
-   // std::cout <<  __LINE__<< "|"  << boost::this_thread::get_id() << "|" << mydata_ptr.use_count() << "|" << i << '\n';
+// void thread_pool_task() {
+//     auto mydata_ptr = std::make_shared<MyData>();
+//     // 线性执行
+//     boost::asio::post(*signal_thread,boost::bind(&TaskRunner::my_task_ptr, &runner,  mydata_ptr));
+//    // std::cout <<  __LINE__<< "|"  << boost::this_thread::get_id() << "|" << mydata_ptr.use_count() << "|" << i << '\n';
 
-}
+// }
 
+
+// mock
 void strand_task(){
     auto mydata_ptr = std::make_shared<MyData>();
    // std::cout <<  __LINE__<< "|"  << boost::this_thread::get_id() << "|" << mydata_ptr.use_count() << "|" << i << '\n';
-    boost::asio::post(*signal_thread,boost::bind(&TaskRunner::strand_task, &runner,  mydata_ptr));
+    boost::asio::post(*signal_thread,boost::bind(&TaskRunner::my_task_ptr, &runner,  mydata_ptr));
 }
 
 ////////////////////////////////////asio-strand///////////////////////////////////////////
@@ -111,12 +131,12 @@ void strand_task(){
 int main() {
     mypool = new boost::asio::thread_pool(4);
     signal_thread = new boost::asio::thread_pool(4);
-    strand_thread = new boost::asio::thread_pool(4);
+    strand_thread = new boost::asio::thread_pool(1);
 
-    for(int i=0 ; i< 10000 ;i++){
+    for(int i=0 ; i< 1 ;i++){
         strand_task();
     }
-    // boost::asio::post(*mypool,boost::bind(&TaskRunner::strand_task, &runner,  mydata_ptr));
+    // boost::asio::post(*mypool, boost::bind(&TaskRunner::strand_task, &runner,  mydata_ptr));
     boost::this_thread::sleep_for(boost::chrono::seconds(10));
     std::cout << "=======>" << std::endl;
     

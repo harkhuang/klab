@@ -46,6 +46,17 @@ ExternalProject_Add(libbenchmark
 )
 
 
+
+ExternalProject_Add(libeigen
+        EXCLUDE_FROM_ALL 1
+        URL ${PROJECT_SOURCE_DIR}/tar/eigen-git-mirror-3.3.7.tar.gz
+        CMAKE_COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=ON   -DSPDLOG_BUILD_BENCH=OFF  -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}
+        BUILD_COMMAND make
+        INSTALL_COMMAND make install
+        )
+
+
+
 # ExternalProject_Add(libtcmalloc
 #         EXCLUDE_FROM_ALL 1
 #         URL ${PROJECT_SOURCE_DIR}/tar/gperftools-2.7.tar.gz

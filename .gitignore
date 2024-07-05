@@ -1,2 +1,6 @@
 build
 .vscode
+tar/benchmark-1.8.4
+tar/eigen-git-mirror-3.3.7
+tar/gperftools-2.10
+tar/moodycamel-ConcurrentQueue

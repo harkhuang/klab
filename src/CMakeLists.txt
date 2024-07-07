@@ -35,6 +35,14 @@ set( SRC_FILES
     ios_service_strand.cpp
     scop_guard.cpp
     eigen_test.cpp
+
+
+
+
+    # 智能指针
+    shared_ptr.cpp
+    shared_ptr2.cpp
+    unique_ptr.cpp
 )
 
 # 遍历源文件列表
